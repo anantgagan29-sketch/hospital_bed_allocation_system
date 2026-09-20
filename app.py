@@ -18,6 +18,7 @@ import os
 from flask import Flask, redirect, url_for
 
 import config
+from database.init_db import init_db
 from models.db import close_db
 from routes.dashboard_routes import dashboard_bp
 from routes.patient_routes import patient_bp
@@ -26,7 +27,18 @@ from routes.request_routes import request_bp
 from routes.history_routes import history_bp
 
 
+def ensure_database() -> None:
+    """Create the database if it doesn't exist yet. Locally this only runs
+    once, ever (the file persists). On Vercel, config.DATABASE_PATH points
+    at /tmp, which is wiped on every cold start, so this recreates a fresh
+    demo database each time a new container starts up."""
+    if not os.path.exists(config.DATABASE_PATH):
+        init_db()
+
+
 def create_app() -> Flask:
+    ensure_database()
+
     app = Flask(__name__)
     app.secret_key = config.SECRET_KEY
 

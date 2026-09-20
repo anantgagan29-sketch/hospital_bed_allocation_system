@@ -7,11 +7,21 @@ project intentionally avoids unnecessary abstraction — see docs/PROJECT_ARCHIT
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE_PATH = os.path.join(BASE_DIR, "database", "hospital.db")
 SCHEMA_PATH = os.path.join(BASE_DIR, "database", "schema.sql")
 SEED_PATH = os.path.join(BASE_DIR, "database", "seed_data.sql")
 REPORTS_DIR = os.path.join(BASE_DIR, "reports")
 SCRIPTS_DIR = os.path.join(BASE_DIR, "scripts")
+
+# On Vercel (and most serverless hosts), everything except /tmp is a
+# read-only filesystem, and /tmp itself is wiped on every cold start. A real
+# server deployment (Render, Railway, PythonAnywhere, your own machine) has
+# a normal writable disk, so the database survives restarts there. On
+# Vercel it does not: expect demo data to reset whenever a new container
+# spins up. See docs/DEPLOYMENT.md.
+if os.environ.get("VERCEL") == "1":
+    DATABASE_PATH = "/tmp/hospital.db"
+else:
+    DATABASE_PATH = os.path.join(BASE_DIR, "database", "hospital.db")
 
 SECRET_KEY = os.environ.get("HOSPITAL_APP_SECRET", "os-pbl-dev-secret-key")
 
