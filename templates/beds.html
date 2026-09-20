@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Beds{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Bed Management</h1>
+  <p>The shared, limited resource this whole platform allocates and schedules access to.</p>
+</div>
+
+{% for bed_type in bed_types %}
+{% set type_beds = beds | selectattr("type", "equalto", bed_type) | list %}
+<div class="panel">
+  <h5>{{ bed_type }} ({{ type_beds|length }} beds)</h5>
+  <div class="row g-3">
+    {% for bed in type_beds %}
+    <div class="col-6 col-md-3 col-lg-2">
+      <div class="pcb-card text-center">
+        <div class="fw-bold">{{ bed.bed_id }}</div>
+        <div class="small text-muted mb-2">{{ bed.ward }}</div>
+        <span class="badge badge-bed-{{ bed.status }} mb-2">{{ bed.status }}</span>
+        {% if bed.status == "ALLOCATED" %}
+          <div class="small mb-2">Patient: {{ bed.patient_id }}</div>
+          <form method="post" action="{{ url_for('beds.discharge', bed_id=bed.bed_id) }}">
+            <button class="btn btn-sm btn-outline-danger w-100" type="submit">Discharge</button>
+          </form>
+        {% else %}
+          <form method="post" action="{{ url_for('beds.toggle_maintenance', bed_id=bed.bed_id) }}">
+            <button class="btn btn-sm btn-outline-secondary w-100" type="submit">
+              {{ "Clear Maintenance" if bed.status == "MAINTENANCE" else "Set Maintenance" }}
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

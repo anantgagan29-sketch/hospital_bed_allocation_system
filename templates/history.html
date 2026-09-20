@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Allocation History &amp; System Logs</h1>
+  <p>Append-only audit trail of every allocation, wait and release.</p>
+</div>
+
+<div class="panel">
+  <h5>Allocation History</h5>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Time</th><th>Request</th><th>Patient</th><th>Bed</th><th>Action</th><th>Details</th></tr></thead>
+      <tbody>
+        {% for h in allocation_history %}
+        <tr>
+          <td class="small text-muted">{{ h.timestamp }}</td>
+          <td>{{ h.request_id or "—" }}</td><td>{{ h.patient_id or "—" }}</td><td>{{ h.bed_id or "—" }}</td>
+          <td>{{ h.action }}</td><td class="small">{{ h.details }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-muted">No history yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="panel">
+  <h5>System Logs</h5>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Time</th><th>Level</th><th>Source</th><th>Message</th></tr></thead>
+      <tbody>
+        {% for l in system_logs %}
+        <tr><td class="small text-muted">{{ l.timestamp }}</td><td>{{ l.level }}</td><td>{{ l.source }}</td><td>{{ l.message }}</td></tr>
+        {% else %}
+        <tr><td colspan="4" class="text-muted">No logs yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,162 @@
+:root {
+  --navy: #0b1729;
+  --navy-light: #12213a;
+  --teal: #14b8a6;
+  --teal-dark: #0d9488;
+  --text-light: #e5edf5;
+  --text-muted: #94a3b8;
+  --border: #1e2f4a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: #f4f7fa;
+  color: #1b2733;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  margin: 0;
+}
+
+.app-shell { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--navy);
+  color: var(--text-light);
+  padding: 20px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  padding: 6px 10px 18px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+.sidebar-brand i { color: var(--teal); font-size: 1.3rem; }
+
+.sidebar-section-label {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 14px 10px 6px;
+}
+
+.sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-light);
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  margin-bottom: 2px;
+}
+.sidebar .nav-link:hover { background: var(--navy-light); color: #fff; }
+.sidebar .nav-link.active { background: var(--teal); color: #04231f; font-weight: 600; }
+
+.content { flex: 1; min-width: 0; }
+.content-inner { padding: 28px 32px 60px; max-width: 1400px; }
+
+.page-header { margin-bottom: 22px; }
+.page-header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
+.page-header p { color: #55677a; margin: 0; }
+
+.stat-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e6ecf2;
+  padding: 18px 20px;
+  height: 100%;
+}
+.stat-card .stat-value { font-size: 1.7rem; font-weight: 700; color: var(--navy); }
+.stat-card .stat-label { color: #6b7c8d; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.stat-card .stat-icon { color: var(--teal); font-size: 1.4rem; }
+
+.panel {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e6ecf2;
+  padding: 22px;
+  margin-bottom: 22px;
+}
+.panel h2, .panel h5 { color: var(--navy); }
+
+.badge-state-NEW { background: #94a3b8; }
+.badge-state-READY { background: #3b82f6; }
+.badge-state-RUNNING { background: var(--teal); }
+.badge-state-WAITING { background: #f59e0b; }
+.badge-state-BLOCKED { background: #ef4444; }
+.badge-state-TERMINATED { background: #0b1729; }
+
+.badge-urgency-CRITICAL { background: #dc2626; }
+.badge-urgency-HIGH { background: #f97316; }
+.badge-urgency-MEDIUM { background: #eab308; color: #422006; }
+.badge-urgency-LOW { background: #22c55e; }
+
+.badge-bed-AVAILABLE { background: #22c55e; }
+.badge-bed-ALLOCATED { background: #0ea5e9; }
+.badge-bed-MAINTENANCE { background: #6b7280; }
+
+.gantt-row { display: flex; align-items: center; margin-bottom: 8px; gap: 10px; }
+.gantt-label { width: 140px; font-size: 0.82rem; color: #55677a; flex-shrink: 0; }
+.gantt-track { position: relative; flex: 1; height: 28px; background: #eef2f6; border-radius: 6px; }
+.gantt-block {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.pcb-card {
+  background: #fff;
+  border: 1px solid #e6ecf2;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.code-terminal {
+  background: #0b1729;
+  color: #7ee7d8;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.82rem;
+  border-radius: 10px;
+  padding: 16px;
+  white-space: pre-wrap;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.event-log {
+  background: #0b1729;
+  color: #d6e4f0;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.8rem;
+  border-radius: 10px;
+  padding: 14px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.btn-teal { background: var(--teal); border-color: var(--teal); color: #04231f; font-weight: 600; }
+.btn-teal:hover { background: var(--teal-dark); border-color: var(--teal-dark); color: #fff; }
+
+.table thead th { color: #55677a; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; border-bottom-width: 1px; }
+
+.viva-category { color: var(--teal-dark); font-weight: 700; margin-top: 26px; margin-bottom: 10px; }

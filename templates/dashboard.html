@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Hospital Bed Allocation Platform{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <p>Live overview of bed availability and allocation requests.</p>
+</div>
+
+<div class="row g-3 mb-2">
+  {% set stat_defs = [
+    ("Total Beds", cards.total_beds, "bi-grid-3x3-gap"),
+    ("Available Beds", cards.available_beds, "bi-door-open"),
+    ("Occupied Beds", cards.occupied_beds, "bi-person-fill"),
+    ("Waiting Requests", cards.waiting_requests, "bi-hourglass-split"),
+    ("Critical Requests", cards.critical_requests, "bi-exclamation-triangle"),
+    ("In-Progress Requests", cards.active_processes, "bi-arrow-repeat"),
+    ("Completed Allocations", cards.completed_allocations, "bi-check-circle"),
+  ] %}
+  {% for label, value, icon in stat_defs %}
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="stat-value">{{ value }}</div>
+          <div class="stat-label">{{ label }}</div>
+        </div>
+        <i class="bi {{ icon }} stat-icon"></i>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-3 mt-1">
+  <div class="col-lg-4">
+    <div class="panel">
+      <h5>Bed Utilization by Type</h5>
+      <canvas id="bedUtilChart" height="220"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel">
+      <h5>Requests by Urgency</h5>
+      <canvas id="urgencyChart" height="220"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel">
+      <h5>Requests by Bed Type</h5>
+      <canvas id="bedTypeChart" height="220"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <h5>Recent Allocation Requests</h5>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Request</th><th>Patient</th><th>Urgency</th><th>Bed Type</th><th>Status</th><th>Assigned Bed</th></tr></thead>
+      <tbody>
+        {% for r in recent_requests %}
+        <tr>
+          <td>{{ r.request_id }}</td>
+          <td>{{ r.patient_name }}</td>
+          <td><span class="badge badge-urgency-{{ r.urgency }}">{{ r.urgency }}</span></td>
+          <td>{{ r.required_bed_type }}</td>
+          <td>{{ r.status }}</td>
+          <td>{{ r.assigned_bed or "—" }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-muted">No requests yet — create one from Allocation Requests.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const byType = {{ by_type | tojson }};
+const bedTypes = Object.keys(byType);
+const available = bedTypes.map(t => byType[t]["AVAILABLE"] || 0);
+const allocated = bedTypes.map(t => byType[t]["ALLOCATED"] || 0);
+const maintenance = bedTypes.map(t => byType[t]["MAINTENANCE"] || 0);
+
+new Chart(document.getElementById('bedUtilChart'), {
+  type: 'bar',
+  data: {
+    labels: bedTypes,
+    datasets: [
+      { label: 'Available', data: available, backgroundColor: '#22c55e' },
+      { label: 'Allocated', data: allocated, backgroundColor: '#0ea5e9' },
+      { label: 'Maintenance', data: maintenance, backgroundColor: '#6b7280' },
+    ]
+  },
+  options: { responsive: true, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+});
+
+new Chart(document.getElementById('urgencyChart'), {
+  type: 'doughnut',
+  data: {
+    labels: {{ urgency_counts.keys() | list | tojson }},
+    datasets: [{ data: {{ urgency_counts.values() | list | tojson }}, backgroundColor: ['#dc2626', '#f97316', '#eab308', '#22c55e'] }]
+  },
+  options: { responsive: true }
+});
+
+new Chart(document.getElementById('bedTypeChart'), {
+  type: 'pie',
+  data: {
+    labels: {{ bed_type_request_counts.keys() | list | tojson }},
+    datasets: [{ data: {{ bed_type_request_counts.values() | list | tojson }}, backgroundColor: ['#14b8a6', '#0ea5e9', '#f97316', '#a855f7', '#eab308'] }]
+  },
+  options: { responsive: true }
+});
+</script>
+{% endblock %}

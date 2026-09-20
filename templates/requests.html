@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Allocation Requests{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Bed Allocation Requests</h1>
+  <p>Submit a request and a matching bed is found and assigned automatically, most urgent first.</p>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="panel">
+      <h5>New Request</h5>
+      {% if patients|length == 0 %}
+        <p class="text-muted">Register a patient first.</p>
+      {% else %}
+      <form method="post">
+        <div class="mb-2">
+          <label class="form-label">Patient</label>
+          <select class="form-select" name="patient_id" required>
+            {% for p in patients %}<option value="{{ p.patient_id }}">{{ p.name }} ({{ p.patient_id }})</option>{% endfor %}
+          </select>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Urgency</label>
+          <select class="form-select" name="urgency" required>
+            {% for u in urgency_levels %}<option value="{{ u }}">{{ u }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Required Bed Type</label>
+          <select class="form-select" name="required_bed_type" required>
+            {% for b in bed_types %}<option value="{{ b }}">{{ b }}</option>{% endfor %}
+          </select>
+        </div>
+        <button class="btn btn-teal w-100" type="submit">Create Request</button>
+        <div class="form-text mt-2">A matching bed is checked and allocated automatically, by urgency, the moment you submit.</div>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="panel">
+      <h5>All Requests ({{ requests|length }})</h5>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>ID</th><th>Patient</th><th>Urgency</th><th>Bed Type</th><th>Status</th><th>Bed</th></tr></thead>
+          <tbody>
+            {% for r in requests %}
+            <tr>
+              <td>{{ r.request_id }}</td><td>{{ r.patient_name }}</td>
+              <td><span class="badge badge-urgency-{{ r.urgency }}">{{ r.urgency }}</span></td>
+              <td>{{ r.required_bed_type }}</td><td>{{ r.status }}</td><td>{{ r.assigned_bed or "—" }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-muted">No requests yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

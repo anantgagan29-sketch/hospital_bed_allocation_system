@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Patients{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Patient Management</h1>
+  <p>Register patients before creating a bed allocation request for them.</p>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="panel">
+      <h5>Register Patient</h5>
+      <form method="post">
+        <div class="mb-2"><label class="form-label">Name</label><input class="form-control" name="name" required></div>
+        <div class="mb-2"><label class="form-label">Age</label><input class="form-control" type="number" min="0" name="age" required></div>
+        <div class="mb-2"><label class="form-label">Gender</label>
+          <select class="form-select" name="gender">
+            <option>M</option><option>F</option><option>Other</option>
+          </select>
+        </div>
+        <div class="mb-2"><label class="form-label">Medical Condition</label><input class="form-control" name="medical_condition"></div>
+        <div class="mb-3"><label class="form-label">Contact</label><input class="form-control" name="contact"></div>
+        <button class="btn btn-teal w-100" type="submit">Register</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="panel">
+      <h5>Registered Patients ({{ patients|length }})</h5>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Gender</th><th>Condition</th><th>Contact</th></tr></thead>
+          <tbody>
+            {% for p in patients %}
+            <tr>
+              <td>{{ p.patient_id }}</td><td>{{ p.name }}</td><td>{{ p.age }}</td>
+              <td>{{ p.gender }}</td><td>{{ p.medical_condition }}</td><td>{{ p.contact }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-muted">No patients registered yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
