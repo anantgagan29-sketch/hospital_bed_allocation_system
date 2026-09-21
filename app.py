@@ -19,7 +19,8 @@ from flask import Flask, redirect, url_for
 
 import config
 from database.init_db import init_db
-from models.db import close_db
+from models.db import close_db, get_connection
+from services.system_monitor import log_startup_diagnostics
 from routes.dashboard_routes import dashboard_bp
 from routes.patient_routes import patient_bp
 from routes.bed_routes import bed_bp
@@ -36,8 +37,22 @@ def ensure_database() -> None:
         init_db()
 
 
+def run_startup_linux_diagnostics() -> None:
+    """Real Linux commands (uname, whoami, uptime, df, ps aux) actually run
+    once per server start, and their real output is written into
+    system_logs -- visible on the History page. This is what keeps Linux
+    command execution part of the running application, not just something
+    covered by tests/test_system_monitor.py."""
+    connection = get_connection()
+    try:
+        log_startup_diagnostics(connection)
+    finally:
+        connection.close()
+
+
 def create_app() -> Flask:
     ensure_database()
+    run_startup_linux_diagnostics()
 
     app = Flask(__name__)
     app.secret_key = config.SECRET_KEY

@@ -90,6 +90,34 @@ def python_os_interface_demo() -> dict:
     }
 
 
+def log_startup_diagnostics(db) -> None:
+    """Runs a handful of real Linux commands and the Python/OS-interface demo
+    once, and writes their actual output into system_logs. This is what
+    makes Linux command execution part of the app's real, live behaviour
+    (checked on every server start) rather than something only exercised by
+    tests/test_system_monitor.py. See docs/LINUX_COMMANDS.md."""
+    from models.db import log_event
+
+    for key in ("uname", "whoami", "uptime", "df", "ps_aux"):
+        result = run_command(key)
+        output = result["stdout"] if result["ok"] else f"error: {result['stderr']}"
+        log_event(
+            source=f"linux:{key}",
+            message=output[:300],
+            level="INFO" if result["ok"] else "WARN",
+            connection=db,
+        )
+
+    interface_demo = python_os_interface_demo()
+    log_event(
+        source="python_os_interface",
+        message=", ".join(f"{k}={v}" for k, v in interface_demo.items()),
+        level="INFO",
+        connection=db,
+    )
+    db.commit()
+
+
 def run_shell_script(script_name: str) -> dict:
     """Runs one whitelisted script from scripts/ via bash. script_name must
     be a bare filename already present on disk in SCRIPTS_DIR — never a
