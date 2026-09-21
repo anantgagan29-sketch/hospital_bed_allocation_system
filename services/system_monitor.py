@@ -52,22 +52,33 @@ def _run(args: list, timeout: int = 5) -> dict:
 
 
 def run_command(command_key: str) -> dict:
-    """Execute one whitelisted command. Rejects anything not in the whitelist."""
+    """Execute one whitelisted command. Rejects anything not in the whitelist.
+
+    Some hosts (macOS locally, or a minimal serverless sandbox on Vercel)
+    simply don't have every binary installed -- that's an environment fact,
+    not an application error, so it's reported as a clean, ok=True message
+    rather than a failure/warning."""
     if command_key not in config.ALLOWED_LINUX_COMMANDS:
         return {"ok": False, "stdout": "", "stderr": "command not whitelisted", "returncode": -1}
 
     if command_key == "wc_processes":
         # Demonstrates a pipe (ps aux | wc -l) built from two whitelisted,
         # fixed argument lists — never from user input.
-        ps_result = _run(config.ALLOWED_LINUX_COMMANDS["ps_aux"])
+        ps_result = run_command("ps_aux")
+        if ps_result["stdout"].startswith("("):
+            return {"ok": True, "stdout": ps_result["stdout"], "stderr": "", "returncode": 0}
         if not ps_result["ok"]:
             return ps_result
         line_count = len(ps_result["stdout"].splitlines())
         return {"ok": True, "stdout": f"{line_count}", "stderr": "", "returncode": 0}
 
     result = _run(config.ALLOWED_LINUX_COMMANDS[command_key])
-    if command_key == "free" and not result["ok"]:
-        result["stdout"] = "(not available on macOS — this command targets Linux)"
+    if not result["ok"] and result["stderr"] == "command not found on this OS":
+        binary = config.ALLOWED_LINUX_COMMANDS[command_key][0]
+        result["stdout"] = (
+            f"(`{binary}` is not installed in this environment's minimal sandbox — it runs "
+            f"normally on a full Linux server, e.g. via ./scripts/system_report.sh)"
+        )
         result["ok"] = True
     return result
 
