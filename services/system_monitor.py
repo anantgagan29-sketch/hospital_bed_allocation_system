@@ -101,6 +101,54 @@ def python_os_interface_demo() -> dict:
     }
 
 
+STARTUP_LOG_LABELS = {
+    "uname": "Linux: OS Info",
+    "whoami": "Linux: Current User",
+    "uptime": "Linux: Uptime",
+    "df": "Linux: Disk Usage",
+    "ps_aux": "Linux: Running Processes",
+}
+
+
+def _summarize_df(raw_output: str) -> str:
+    """df -h's raw output lists every mount on the machine, which on a
+    cloud sandbox is a wall of unrelated internal paths. Pull out just the
+    primary filesystem's numbers into one readable line."""
+    lines = raw_output.splitlines()
+    if len(lines) < 2:
+        return raw_output[:200]
+    columns = lines[1].split()
+    try:
+        use_percent = next(c for c in columns if c.endswith("%"))
+        size, used, avail = columns[1], columns[2], columns[3]
+        return f"{used} used of {size} ({use_percent} full), {avail} free"
+    except (StopIteration, IndexError):
+        return lines[0][:200]
+
+
+def _friendly_startup_message(key: str, result: dict) -> str:
+    """Turns a command's raw output into one short, readable line -- same
+    real data, presented for a human reading the History page instead of
+    a terminal."""
+    if not result["ok"]:
+        return f"error: {result['stderr']}"
+
+    text = result["stdout"]
+    if text.startswith("("):  # our own graceful "not installed here" message
+        return text
+
+    if key == "whoami":
+        return f"Server process is running as OS user \"{text}\""
+    if key == "uptime":
+        return text
+    if key == "df":
+        return _summarize_df(text)
+    if key == "ps_aux":
+        process_count = max(len(text.splitlines()) - 1, 0)  # minus header row
+        return f"{process_count} process(es) currently running on this machine"
+    return text  # uname: the full kernel/OS string is already readable
+
+
 def log_startup_diagnostics(db) -> None:
     """Runs a handful of real Linux commands and the Python/OS-interface demo
     once, and writes their actual output into system_logs. This is what
@@ -111,10 +159,10 @@ def log_startup_diagnostics(db) -> None:
 
     for key in ("uname", "whoami", "uptime", "df", "ps_aux"):
         result = run_command(key)
-        output = result["stdout"] if result["ok"] else f"error: {result['stderr']}"
+        message = _friendly_startup_message(key, result)
         log_event(
-            source=f"linux:{key}",
-            message=output[:300],
+            source=STARTUP_LOG_LABELS[key],
+            message=message[:300],
             level="INFO" if result["ok"] else "WARN",
             connection=db,
         )
