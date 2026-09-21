@@ -119,10 +119,18 @@ def log_startup_diagnostics(db) -> None:
             connection=db,
         )
 
+    # Same real os.*/platform.* calls as python_os_interface_demo(), but
+    # written as one readable sentence tied to what this app actually is —
+    # not a raw key=value dump of Python internals.
     interface_demo = python_os_interface_demo()
     log_event(
-        source="python_os_interface",
-        message=", ".join(f"{k}={v}" for k, v in interface_demo.items()),
+        source="engine:startup",
+        message=(
+            f"Hospital Allocation Engine started as OS process PID {interface_demo['os.getpid()']} "
+            f"on {interface_demo['platform.system()']} "
+            f"({interface_demo['os.cpu_count()']} CPU core(s) visible to os.cpu_count()). "
+            f"Process Manager and Scheduler are ready to accept allocation requests."
+        ),
         level="INFO",
         connection=db,
     )
